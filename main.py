@@ -30,19 +30,26 @@ def price_to_int(input:Tag) -> int:
         )
     )
 
-def get_metres_prices(url:str) -> List[Tuple[int, int]]:
+def html_from_url(url:str) -> str:
     """
-    Takes the url from an inmuebles24.com query, scrapes the page for square metre 
-    amounts and prices, then returns a List of Tuples from it
+    Takes the url from an inmuebles24.com query, and returns the content of the
+    page as a string
     """
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
     html = requests.get(url, headers = headers)
     #This way we prevent a result from getting through when we hit a redirection
     if(len(html.history) > 0): 
-        return []
+        return ''
+    else:
+        return html.text
 
-    soup = BeautifulSoup(html.text, 'lxml')
+def get_metres_prices(html:str) -> List[Tuple[int, int]]:
+    """
+    Takes the html from an inmuebles24.com query as a string, scrapes the page for
+    square metre amounts and prices, then returns a List of Tuples from it
+    """
+    soup = BeautifulSoup(html, 'lxml')
 
     prices = soup.find_all('div', class_ = 'sc-12dh9kl-4 ehivnq')
     prices = [price_to_int(x) for  x in prices]
@@ -64,7 +71,9 @@ if len(sys.argv) < 2:
 
 url = sys.argv[1]
 
-metres_prices = get_metres_prices(url)
+html = html_from_url(url)
+
+metres_prices = get_metres_prices(html)
 
 df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
 
