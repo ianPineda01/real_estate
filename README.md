@@ -1,4 +1,6 @@
 # real_estate
+Python project that takes a url from an inmuebles24.com query and returns spark
+dataframe with useful information about the units
 
 ## Set up virtual environment and install dependencies
 ```
