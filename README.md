@@ -12,7 +12,7 @@ pip install -r requirements.txt
 
 ## Run the program
 ```
-python main.py
+python main.py [url]
 ```
 
 ## Exit virtual environment

@@ -3,6 +3,7 @@ from typing import List, Tuple
 from pyspark.sql import SparkSession
 from bs4 import BeautifulSoup, Tag
 import requests
+import sys
 
 #===================================Functions===================================
 def metres_to_int(input:Tag) -> int:
@@ -51,10 +52,16 @@ def get_metres_prices(url:str) -> List[Tuple[int, int]]:
     return list(zip(square_metres, prices))
 
 #=====================================Main======================================
-
 spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
 
-metres_prices = get_metres_prices('https://www.inmuebles24.com/departamentos-en-venta-en-alvaro-obregon-pagina-300.html')
+if len(sys.argv) < 2:
+    print("The correct way to call the program is:")
+    print("python main.py [url]")
+    exit()
+
+url = sys.argv[1]
+
+metres_prices = get_metres_prices(url)
 
 df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
 
