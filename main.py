@@ -27,6 +27,10 @@ def price_to_int(input:Tag) -> int:
     )
 
 def get_metres_prices(url:str) -> List[Tuple[int, int]]:
+    """
+    Takes the url from an inmuebles24.com query, scrapes the page for square metre 
+    amounts and prices, then returns a List of Tuples from it
+    """
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
 
     html = requests.get(url, headers = headers)
