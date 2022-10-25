@@ -77,6 +77,6 @@ metres_prices = get_metres_prices(html)
 
 df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
 
-df.show()
+df.withColumn('Precio/m^2', df['Precio'] / df['m^2']).show()
 
 spark.stop()
