@@ -4,6 +4,7 @@ from pyspark.sql import SparkSession
 from bs4 import BeautifulSoup, Tag
 import requests
 import sys
+import re
 
 #===================================Functions===================================
 def metres_to_int(input:Tag) -> int:
@@ -20,11 +21,13 @@ def price_to_int(input:Tag) -> int:
     """
     Takes a price <div> and converts it into an int
     """
+    # TO-DO convert USD prices to MXN
     return int(
-        str(input.encode_contents())
-        .replace('b\'MN ', '')
-        .replace('\'', '')
-        .replace(',', '')
+        re.sub(
+            "[^0-9]", 
+            "",
+            str(input.encode_contents())
+        )
     )
 
 def get_metres_prices(url:str) -> List[Tuple[int, int]]:
