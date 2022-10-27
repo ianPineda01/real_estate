@@ -12,8 +12,11 @@ pip install -r requirements.txt
 
 ## Run the program
 ```
-python main.py [url]
+python main.py [url] [number of pages to scrap for info (optional, default = 1)]
 ```
+
+Note: for every aditional page, we wait 500 miliseconds to not overwhelm the website
+with our requests.
 
 ## Exit virtual environment
 ```
