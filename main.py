@@ -60,16 +60,16 @@ def get_metres_prices(html:str) -> List[Tuple[int, int]]:
     return list(zip(square_metres, prices))
 
 #=====================================Main======================================
-def main():
+def main(argv:List[str]):
     spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
 
-    if len(sys.argv) < 2:
+    if len(argv) < 2:
         print("The correct way to call the program is:")
         print("python main.py [url]")
         exit()
 
-    if len(sys.argv) > 2:
-        n = int(sys.argv[2])
+    if len(argv) > 2:
+        n = int(argv[2])
     else:
         n = 1
 
@@ -77,7 +77,7 @@ def main():
 
     for i in range(1, n + 1):
         time.sleep(0.5)
-        url = sys.argv[1].replace('.html', f'-pagina-${i}.html')
+        url = argv[1].replace('.html', f'-pagina-${i}.html')
         html = html_from_url(url)
         metres_prices += get_metres_prices(html)
 
@@ -88,4 +88,4 @@ def main():
     spark.stop()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)
