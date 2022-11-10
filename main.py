@@ -60,28 +60,32 @@ def get_metres_prices(html:str) -> List[Tuple[int, int]]:
     return list(zip(square_metres, prices))
 
 #=====================================Main======================================
-spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
+def main():
+    spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
 
-if len(sys.argv) < 2:
-    print("The correct way to call the program is:")
-    print("python main.py [url]")
-    exit()
+    if len(sys.argv) < 2:
+        print("The correct way to call the program is:")
+        print("python main.py [url]")
+        exit()
 
-if len(sys.argv) > 2:
-    n = int(sys.argv[2])
-else:
-    n = 1
+    if len(sys.argv) > 2:
+        n = int(sys.argv[2])
+    else:
+        n = 1
 
-metres_prices:List[Tuple[int, int]] = []
+    metres_prices:List[Tuple[int, int]] = []
 
-for i in range(1, n + 1):
-    time.sleep(0.5)
-    url = sys.argv[1].replace('.html', f'-pagina-${i}.html')
-    html = html_from_url(url)
-    metres_prices += get_metres_prices(html)
+    for i in range(1, n + 1):
+        time.sleep(0.5)
+        url = sys.argv[1].replace('.html', f'-pagina-${i}.html')
+        html = html_from_url(url)
+        metres_prices += get_metres_prices(html)
 
-df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
+    df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
 
-df.withColumn('Precio/m^2', df['Precio']/df['m^2']).show()
+    df.withColumn('Precio/m^2', df['Precio']/df['m^2']).show()
 
-spark.stop()
+    spark.stop()
+
+if __name__ == '__main__':
+    main()
