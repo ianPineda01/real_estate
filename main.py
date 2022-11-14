@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup, Tag
 import requests
 import sys
 import re
-import time
 
 #===================================Functions===================================
 def metres_to_int(input:Tag) -> int:
@@ -40,7 +39,10 @@ def html_from_url(url:str) -> str:
 
     html = requests.get(url, headers = headers)
     #This way we prevent a result from getting through when we hit a redirection
-    return html.text
+    if(len(html.history) > 0): 
+        return ''
+    else:
+        return html.text
 
 def get_metres_prices(html:str) -> List[Tuple[int, int]]:
     """
@@ -68,22 +70,15 @@ def main(argv:List[str]):
         print("python main.py [url]")
         exit()
 
-    if len(argv) > 2:
-        n = int(argv[2])
-    else:
-        n = 1
+url = sys.argv[1]
 
-    metres_prices:List[Tuple[int, int]] = []
+html = html_from_url(url)
 
-    for i in range(1, n + 1):
-        time.sleep(0.5)
-        url = argv[1].replace('.html', f'-pagina-${i}.html')
-        html = html_from_url(url)
-        metres_prices += get_metres_prices(html)
+metres_prices = get_metres_prices(html)
 
     df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
 
-    df.withColumn('Precio/m^2', df['Precio']/df['m^2']).show()
+df.withColumn('Precio/m^2', df['Precio'] / df['m^2']).show()
 
     spark.stop()
 
