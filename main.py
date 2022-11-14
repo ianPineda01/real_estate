@@ -2,8 +2,12 @@
 from typing import List, Tuple
 from pyspark.sql import SparkSession
 from bs4 import BeautifulSoup, Tag
+from flask import Flask, render_template
+from flask_wtf import FlaskForm 
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired, URL
+import pandas
 import requests
-import sys
 import re
 
 #===================================Functions===================================
@@ -61,26 +65,31 @@ def get_metres_prices(html:str) -> List[Tuple[int, int]]:
 
     return list(zip(square_metres, prices))
 
-#=====================================Main======================================
-def main(argv:List[str]):
-    spark = SparkSession.builder.appName("SimpleApp").getOrCreate()
+#====================================Flask======================================
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'TO-DO: have a real key'
 
-    if len(argv) < 2:
-        print("The correct way to call the program is:")
-        print("python main.py [url]")
-        exit()
+class MyForm(FlaskForm):
+    url = StringField('url:', validators=[DataRequired(), URL()])
 
-    url = sys.argv[1]
 
-    html = html_from_url(url)
+@app.route('/')
+def index():
+    form = MyForm()
+    return render_template('index.html', form=form) 
 
+@app.route('/submit', methods=['GET', 'POST'])
+def submit():
+    spark = SparkSession.builder.appName('Real_Estate').getOrCreate()
+    form = MyForm()
+    html = html_from_url(form.url.data)
     metres_prices = get_metres_prices(html)
-
-    df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
-
-    df.withColumn('Precio/m^2', df['Precio'] / df['m^2']).show()
-
+    df = spark.createDataFrame(metres_prices, ['m^2', 'Price (MXN)'])
+    df2 = df.withColumn('Price/m^2', df['Price (MXN)'] / df['m^2'])
+    resulting_html = df2.toPandas().to_html(index=False)
     spark.stop()
+    return resulting_html
 
+#=====================================Main======================================
 if __name__ == '__main__':
-    main(sys.argv)
+    app.run(debug=True)
