@@ -70,15 +70,15 @@ def main(argv:List[str]):
         print("python main.py [url]")
         exit()
 
-url = sys.argv[1]
+    url = sys.argv[1]
 
-html = html_from_url(url)
+    html = html_from_url(url)
 
-metres_prices = get_metres_prices(html)
+    metres_prices = get_metres_prices(html)
 
     df = spark.createDataFrame(metres_prices, ['m^2', 'Precio'])
 
-df.withColumn('Precio/m^2', df['Precio'] / df['m^2']).show()
+    df.withColumn('Precio/m^2', df['Precio'] / df['m^2']).show()
 
     spark.stop()
 
