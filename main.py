@@ -3,10 +3,11 @@ from typing import List, Tuple
 from pyspark.sql import SparkSession
 from bs4 import BeautifulSoup, Tag
 from flask import Flask, render_template
-from flask_wtf import FlaskForm 
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired, URL
-import pandas
+from flask_wtf import FlaskForm #type: ignore Stub file not found 
+from wtforms import StringField #type: ignore Stub file not found
+from wtforms.validators import DataRequired, URL #type: ignore Stub file not found
+import pandas # type: ignore I don't directly access pandas, but it is required
+# for .toPandas() method 
 import requests
 import re
 
@@ -82,11 +83,13 @@ def index():
 def submit():
     spark = SparkSession.builder.appName('Real_Estate').getOrCreate()
     form = MyForm()
-    html = html_from_url(form.url.data)
+    html = html_from_url(form.url.data) #type: ignore The type checker doesn't know 
+    # but I can be sure this will be a string
     metres_prices = get_metres_prices(html)
     df = spark.createDataFrame(metres_prices, ['m^2', 'Price (MXN)'])
     df2 = df.withColumn('Price/m^2', df['Price (MXN)'] / df['m^2'])
-    resulting_html = df2.toPandas().to_html(index=False)
+    resulting_html = df2.toPandas().to_html(index=False) #type: ignore again, I'm 
+    # sure this returns a string
     spark.stop()
     return resulting_html
 
