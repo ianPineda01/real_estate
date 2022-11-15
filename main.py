@@ -6,6 +6,7 @@ from flask import Flask, render_template
 from flask_wtf import FlaskForm #type: ignore Stub file not found 
 from wtforms import StringField #type: ignore Stub file not found
 from wtforms.validators import DataRequired, URL #type: ignore Stub file not found
+import webbrowser
 import pandas # type: ignore I don't directly access pandas, but it is required
 # for .toPandas() method 
 import requests
@@ -95,4 +96,5 @@ def submit():
 
 #=====================================Main======================================
 if __name__ == '__main__':
+    webbrowser.open('localhost:5000', new = 2)
     app.run(debug=True)
