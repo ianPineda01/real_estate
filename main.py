@@ -7,8 +7,6 @@ from flask_wtf import FlaskForm #type: ignore Stub file not found
 from wtforms import StringField #type: ignore Stub file not found
 from wtforms.validators import DataRequired, URL #type: ignore Stub file not found
 import webbrowser
-import pandas # type: ignore I don't directly access pandas, but it is required
-# for .toPandas() method 
 import requests
 import re
 
@@ -50,22 +48,25 @@ def html_from_url(url:str) -> str:
     else:
         return html.text
 
-def get_metres_prices(html:str) -> List[Tuple[int, int]]:
+def get_metres_prices(html:str) -> List[Tuple[int, int, str]]:
     """
     Takes the html from an inmuebles24.com query as a string, scrapes the page for
     square metre amounts and prices, then returns a List of Tuples from it
     """
     soup = BeautifulSoup(html, 'lxml')
 
-    prices = soup.find_all('div', class_ = 'sc-12dh9kl-4 ehivnq')
+    postings = soup.find_all('div', class_ = 'sc-i1odl-0 cYmZqs')
+    prices = [x.find('div', class_='sc-12dh9kl-4 ehivnq') for x in postings]
     prices = [price_to_int(x) for  x in prices]
 
-    square_metres = soup.find_all('div', class_ = 'sc-1uhtbxc-0 cIDnkN')
+    square_metres = [x.find('div', class_ = 'sc-1uhtbxc-0 cIDnkN') for x in postings]
     square_metres = [x.find_all('span')[1] for x in square_metres]
-    square_metres = square_metres[-len(prices):]
     square_metres = [metres_to_int(x) for x in square_metres]
 
-    return list(zip(square_metres, prices))
+    links = [x.get('data-to-posting') for x in postings]
+    links = [f'www.inmuebles24.com{x}' for x in links] 
+
+    return list(zip(square_metres, prices, links))
 
 #====================================Flask======================================
 app = Flask(__name__)
@@ -73,7 +74,6 @@ app.config['SECRET_KEY'] = 'TO-DO: have a real key'
 
 class MyForm(FlaskForm):
     url = StringField('url:', validators=[DataRequired(), URL()])
-
 
 @app.route('/')
 def index():
@@ -87,8 +87,8 @@ def submit():
     html = html_from_url(form.url.data) #type: ignore The type checker doesn't know 
     # but I can be sure this will be a string
     metres_prices = get_metres_prices(html)
-    df = spark.createDataFrame(metres_prices, ['m^2', 'Price (MXN)'])
-    df2 = df.withColumn('Price/m^2', df['Price (MXN)'] / df['m^2'])
+    df = spark.createDataFrame(metres_prices, ['Size', 'Price (MXN)', 'Link'])
+    df2 = df.withColumn('Price/m^2', df['Price (MXN)'] / df['Size'])
     resulting_html = df2.toPandas().to_html(index=False) #type: ignore again, I'm 
     # sure this returns a string
     spark.stop()
