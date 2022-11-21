@@ -1,6 +1,7 @@
-from typing import List, Tuple
 from bs4 import BeautifulSoup, Tag
 import requests
+
+from typing import List, Tuple
 import re
 
 def metres_to_int(input:Tag) -> int:
