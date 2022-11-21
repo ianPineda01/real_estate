@@ -6,7 +6,8 @@ from wtforms.validators import DataRequired, URL #type: ignore Stub file not fou
 
 import webbrowser
 
-from scraping import scrape
+from scraping import scrape, html_from_url
+from db import write_DF
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'TO-DO: have a real key'
@@ -39,6 +40,7 @@ def submit():
     df = spark.createDataFrame(data, ['Size', 'Price (MXN)', 'Link'])
     df2 = df.withColumn('Price/m^2', df['Price (MXN)'] / df['Size'])
 
+    write_DF(df2, 'main.db')
     resulting_html = df2.toPandas().to_html(index=False) #type: ignore 
     spark.stop()
     return resulting_html
