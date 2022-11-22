@@ -8,9 +8,16 @@
 </head>
 <body>
     <h1>Real Estate</h1>
-    <form method="POST" action="/submit">
+    <form method="POST" action="/dbData">
+        <input type="submit" value="See stored data">
+    </form>
+    <form method="POST" action="/clearData">
+        <input type="submit" value="Clear stored data">
+    </form>
+    <br>
+    <form method="POST" action="/fetchURL">
         {{ form.url.label }} {{ form.url(size=20) }}
-        <input type="submit" value="Go">
+        <input type="submit" value="Fetch new data">
     </form>
 
 </body>
