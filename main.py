@@ -1,8 +1,8 @@
-from pyspark.sql import SparkSession
 from flask import Flask, render_template, redirect
 from flask_wtf import FlaskForm #type: ignore Stub file not found 
 from wtforms import StringField #type: ignore Stub file not found
 from wtforms.validators import DataRequired, URL #type: ignore Stub file not found
+import pandas as pd
 
 import webbrowser
 
@@ -38,12 +38,11 @@ def db_data():
     """
     Reads data from database and returns dataframe as html
     """
-    spark = SparkSession.builder.appName('RealEstate').getOrCreate()
-    df = read_to_DF(spark, DATABASE_FILE)
+    df = read_to_DF(DATABASE_FILE)
     if df is None:
         return 'No data avaliable'
     else:
-        return df.toPandas().to_html()
+        return df.to_html()
 
 @app.route('/fetchURL', methods=['GET', 'POST'])
 def fetch_URL():
@@ -52,20 +51,17 @@ def fetch_URL():
     relevant data, and makes a spark dataframe with said data, finally returns a
     table with the data gathered.
     """
-    spark = SparkSession.builder.appName('Real_Estate').getOrCreate()
-
     form = FetchURL()
 
     url:str = form.url.data
     html:str = html_from_url(url)
     data = scrape(html)
 
-    df = spark.createDataFrame(data, ['Size', 'Price (MXN)', 'Link'])
-    df2 = df.withColumn('Price/m^2', df['Price (MXN)'] / df['Size'])
+    df = pd.DataFrame(data, columns=['Size', 'Price (MXN)', 'Link'])
+    # df['Price/m^2'] = df['Price (MXN)'] / df['Size']
 
-    write_DF(df2, DATABASE_FILE)
-    resulting_html = df2.toPandas().to_html(index=False) 
-    spark.stop()
+    # write_DF(df, DATABASE_FILE)
+    resulting_html = df.to_html(index=False) 
     return resulting_html
 
 def main():
